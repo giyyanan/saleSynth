@@ -1,0 +1,25 @@
+{
+  "name": "momentum",
+  "version": "1.0.0",
+  "description": "basic app",
+  "main": "main.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/giyyanan/saleSynth.git"
+  },
+  "keywords": [
+    "sales",
+    "sentiment",
+    "closing",
+    "deal"
+  ],
+  "author": "giyyanan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/giyyanan/saleSynth/issues"
+  },
+  "homepage": "https://github.com/giyyanan/saleSynth#readme"
+}
