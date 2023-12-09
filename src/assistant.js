@@ -4,13 +4,13 @@ import OpenAI from 'openai';
 import readline from 'readline';
 
 // fetching the provided transcript file
-let data = '';
+let transcriptData = '';
 if(process.argv[2]){
 	let filePath = process.argv[2];
 	
 	try {
 		console.log(filePath)
-		data = fs.readFileSync(filePath, 'utf8');
+		transcriptData = fs.readFileSync(filePath, 'utf8');
 		console.log('\n ~~~Transcript succesfully parsed~~~ \n');
 	}
 	catch{
@@ -23,7 +23,7 @@ if(process.argv[2]){
 
 console.log("\nWelcome to SaleSynth a sales assistant powered by open AI\n")
 
-if(data.length ==0){
+if(transcriptData.length ==0){
 	console.log("No transcipt file provided for the assistant to synthesise a sales call\n")
 	console.log("Alternatively you can prompt the assistant to generate a sample sales call in a desired format\n")
 }
@@ -52,8 +52,9 @@ const rl = readline.createInterface({
 // });
 
 let assistant;
+let thread;
 
-async function main(prompt) {
+async function main() {
 	//using a predefined assistant
 	const myAssistant = await openai.beta.assistants.retrieve(
 		"asst_XzcBcnhz5foM27x5865wpmRZ"
@@ -62,24 +63,38 @@ async function main(prompt) {
 	assistant = myAssistant
 
 
-	const thread = await openai.beta.threads.create();
+	thread = await openai.beta.threads.create();
 
-	const message = await openai.beta.threads.messages.create(
-		thread.id,
-		{
-			role: "user",
-			content: prompt,//"generate a sample sales call between a vr headset sales rep and a AR game company executive, with timeframe as [00:00:00] followed by a speaker name in braces()"
-		}
-		);
+	let message 
+
+	if(transcriptData.length >0){
+		message = await openai.beta.threads.messages.create(
+			thread.id,
+			{
+				role: "user",
+				content: "You are going to synthesize this sales call provided as a transcript" + transcriptData,
+			}
+			);
+
+	} else{
+		message = await openai.beta.threads.messages.create(
+			thread.id,
+			{
+				role: "user",
+				content: 'check with the user if he want to generate a sample sales call transcript',
+			}
+			);
+
+	}
 
 	let run = await openai.beta.threads.runs.create(
 		thread.id,
 		{ 
 			assistant_id: assistant.id,
-			instructions: "Please address the user as Mortal. The user has a premium account. So be polite and couteous"
+			instructions: "Please address the user as Mortal. The user has a premium account. So be polite and couteous."
 		}
 		);
-	let stat = "generating"
+	let stat = "Initialising"
 	while(run.status == 'in_progress' || run.status == 'queued'){
 		run = await openai.beta.threads.runs.retrieve(
 			thread.id,
@@ -91,20 +106,44 @@ async function main(prompt) {
 
 	console.log(run.status)
 
-	const messages = await openai.beta.threads.messages.list(
+	const aiResponse = await openai.beta.threads.messages.list(
 		thread.id
 		);
 
-	console.log(messages.data[0].content[0].text.value)
+	console.log(aiResponse.data[0].content.splice(-1)[0].text.value)
 
-	const message = await openai.beta.threads.messages.create(
-		thread.id,
-		{
-			role: "user",
-			content: messages.data[0].content[0].text.value,
-		}
-		);
 }
+
+async function chat(prompt){
+	if(thread.id){
+		let run = await openai.beta.threads.runs.create(
+			thread.id,
+			{ 
+				assistant_id: assistant.id,
+				instructions: prompt,
+			}
+			);
+		let stat = "generating"
+		while(run.status == 'in_progress' || run.status == 'queued'){
+			run = await openai.beta.threads.runs.retrieve(
+				thread.id,
+				run.id
+				);
+
+			console.log(stat+='.')
+		}
+
+		console.log(run.status)
+
+		const aiResponse = await openai.beta.threads.messages.list(
+			thread.id
+			);
+
+		console.log(aiResponse.data[0].content[0].text.value)
+	}
+}
+
+main()
 
 const keepPrompting = () => {
 	rl.question("\n::", (userPrompt) => {
@@ -112,7 +151,7 @@ const keepPrompting = () => {
 			console.log('Assistant is now powering off');
 			rl.close();
 		} else {
-			main(userPrompt)
+			chat(userPrompt)
 			keepPrompting();
 		}
 	});
