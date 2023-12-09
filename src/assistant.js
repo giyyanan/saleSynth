@@ -1,35 +1,48 @@
 //https://platform.openai.com/docs/assistants/overview?lang=node.js
-
+import * as fs from 'fs';
 import OpenAI from 'openai';
 import readline from 'readline';
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-console.log("\nWelcome to SaleSynth an assistant powered by open AI\n")
-console.log("keep prompting the assistant for any queries\n"); 
-console.log("To exit any time simply type `exit` or `stop\n")
+// fetching the provided transcript file
+let data = '';
+if(process.argv[2]){
+	let filePath = process.argv[2];
+	
+	try {
+		console.log(filePath)
+		data = fs.readFileSync(filePath, 'utf8');
+		console.log('\n ~~~Transcript succesfully parsed~~~ \n');
+	}
+	catch{
+		console.log('\n Couldn not read file. Give proper path to access file\n')
+		console.log('Alternatively you ask assistant to generate a random sales call\n')
+	}
+}
 
-const keepPrompting = () => {
-    rl.question("Enter your prompt Here", (userInput) => {
-        if (userInput === 'exit' || userInput === 'stop') {
-            console.log('Assistant is now powering off');
-            rl.close();
-        } else {
-            console.log(`You entered: ${userInput}`);
-            keepPrompting();
-        }
-    });
-};
+// Initial bootup messages for the assistant
 
-keepPrompting();
+console.log("\nWelcome to SaleSynth a sales assistant powered by open AI\n")
+
+if(data.length ==0){
+	console.log("No transcipt file provided for the assistant to synthesise a sales call\n")
+	console.log("Alternatively you can prompt the assistant to generate a sample sales call in a desired format\n")
+}
+
+console.log("You can prompt the assistant for any queries related to the transcript\n"); 
+
+console.log("To exit any time simply type `exit` or `stop`\n")
 
 const openai = new OpenAI({
 	apiKey:process.env.OPENAI_API_KEY,
 	dangerouslyAllowBrowser:true,
 });
 
+const rl = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout
+});
+
+//code for creating an assistant form the gound up. you can provide any instructions. but every call create a new assistant 
 
 // const assistant = await openai.beta.assistants.create({
 // 	name: "saleSynth",
@@ -41,6 +54,7 @@ const openai = new OpenAI({
 let assistant;
 
 async function main(prompt) {
+	//using a predefined assistant
 	const myAssistant = await openai.beta.assistants.retrieve(
 		"asst_XzcBcnhz5foM27x5865wpmRZ"
 		);
@@ -62,7 +76,7 @@ async function main(prompt) {
 		thread.id,
 		{ 
 			assistant_id: assistant.id,
-			instructions: "Please address the user as Human. The user has a premium account."
+			instructions: "Please address the user as Mortal. The user has a premium account. So be polite and couteous"
 		}
 		);
 	let stat = "generating"
@@ -73,7 +87,6 @@ async function main(prompt) {
 			);
 
 		console.log(stat+='.')
-		// setTimeout(() => {stat=stat+'.';console.log(stat)},5000);
 	}
 
 	console.log(run.status)
@@ -83,6 +96,26 @@ async function main(prompt) {
 		);
 
 	console.log(messages.data[0].content[0].text.value)
+
+	const message = await openai.beta.threads.messages.create(
+		thread.id,
+		{
+			role: "user",
+			content: messages.data[0].content[0].text.value,
+		}
+		);
 }
 
-main(process.argv[2])
+const keepPrompting = () => {
+	rl.question("\n::", (userPrompt) => {
+		if (userPrompt === 'exit' || userPrompt === 'stop') {
+			console.log('Assistant is now powering off');
+			rl.close();
+		} else {
+			main(userPrompt)
+			keepPrompting();
+		}
+	});
+};
+
+keepPrompting();
