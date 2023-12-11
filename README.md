@@ -69,6 +69,10 @@ Scripts and Usage
 
 Future Improvemnts
 
+ * provide a raw audio file .mp3 or .wav for transcribing real world calls
+
  * Persit the converations to a DataBase.
 
  * Provide GUI Web interface for seamless User Experience.
+
+ * Use Regex matcher to validate OPENAI_API_KEY and AssitantID
