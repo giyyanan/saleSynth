@@ -21,9 +21,9 @@ setting up the enviroinment
   KINDLY MAKE SURE TO PROVIDE THE API KEY IN config.JSON FILE BEFORE EXECUTING ANY CODE.
   visit https://platform.openai.com/api-keys for generating API keys.
 
-. Save the key genberate under OPEN_AI_KEY in config.json file. 
+. Save the key generated under OPENAI_API_KEY key in config.json file. 
 
-. You can also set up the API key as an enviroinment variable and access it via process.env.OPEN_AI_KEY.
+. You can also set up the API key as an enviroinment variable and access it via process.env.OPENAI_API_KEY.
 
 	for more inforamtion on API and Authentication, you can can refer openAI official documentation.
 
