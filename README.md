@@ -18,7 +18,7 @@ Requiremnts:
 setting up the enviroinment
 
 . Subscribe to Open AI API. It requires payment, after which you can get a API key.
-  KINDLY MAKE SURE TO PROVIDE THE PAT IN PROPERTIES.JSON FILE BEFORE EXECUTING ANY CODE.
+  KINDLY MAKE SURE TO PROVIDE THE API KEY IN config.JSON FILE BEFORE EXECUTING ANY CODE.
   visit https://platform.openai.com/api-keys for generating API keys.
 
 . Save the key genberate under OPEN_AI_KEY in config.json file. 
